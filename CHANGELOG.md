@@ -4,6 +4,31 @@ All notable changes to `phil/upload-scan` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](https://keepachangelog.com/) principles.
 
+## 0.1.1-alpha - 2026-11-20
+
+A scan that could not read the whole file, or the whole answer of clamd, is an error
+result, never a clean file.
+
+### Added
+
+- The documentation of clamd on a local Unix socket: `LocalSocket`, its group and mode, the user PHP runs as, systemd
+  and containers.
+- The documentation of archives and clamd's limits — `MaxScanSize`, `MaxFileSize`, `MaxFiles`, `MaxRecursion` and
+  `AlertExceedsMax`, without which an archive past a limit comes back clean — and of the versions to scan with, ClamAV
+  1.5.4 or later, or 1.4.6 on the 1.4 line.
+- The [ASVS 5.0 mapping](doc/asvs.md).
+- Integration tests against a real clamd: the test file three archives down, and an archive past `MaxFiles`, with and
+  without `AlertExceedsMax`.
+
+### Security
+
+- An answer of clamd without its null byte, such as `stream: OK` followed by a closed connection, was read as clean:
+  it is an error result, `clamd closed the connection before the end of its answer.`; an answer of 4 096 bytes without
+  one is an error too. `ping()` answers `false` and `version()` `null` for an answer cut short.
+- A source stream that timed out, or gave nothing more without having ended, was taken for the end of the file, and the
+  start of the file was scanned and found clean: `ClamdScanner` and `FakeScanner` answer an error result and send no
+  last chunk.
+
 ## 0.1.0-alpha - 2026-11-11
 
 ### Added
